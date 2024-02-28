@@ -92,7 +92,6 @@ def final_matrix(qzeros, scales, qweight, bits, group_size, wf):
         weight = weight.reshape(weight.shape[0] * weight.shape[1], weight.shape[2])
     return weight
 
-
 # write the matrix in the file `name`
 def write_matrices(name, matrices):
     #matrices = matrices.astype('f')
@@ -325,7 +324,7 @@ def mixtral_bytes_matrices(model):
 
 # get the quantized matrix that is used to predict and save it in a binary file
 # this is for llama 2 model
-def llama_matrices(model, name, quant):
+def llama_GPTQ_matrices(model, name, quant):
     files = []
     shapes = []
     dir_file = save_dir + name + "/" + quant + "/"
@@ -434,9 +433,73 @@ def llama_matrices(model, name, quant):
         write_matrices(dir_file + name_file, ret)
     print("command: ", "--files " + ":".join(files), "--sizes " + ":".join(shapes))
 
+# not quantized models
+def llama_fp16_matrices(model, name, quant):
+    files = []
+    shapes = []
+    dir_file = save_dir + name + "/" + quant + "/"
+    for i in range(len(model.model.layers)):
+        ret = model.model.layers[i].mlp.down_proj.weight
+
+        name_file = "mlp-down_proj-" + str(i)
+        shapes.append("x".join([str(ret.shape[0]), str(ret.shape[1])]))
+        files.append(name_file)
+        
+        write_matrices(dir_file + name_file, ret)
+
+        ret = model.model.layers[i].mlp.gate_proj.weight
+
+        name_file = "mlp-gate_proj-" + str(i)
+        shapes.append("x".join([str(ret.shape[0]), str(ret.shape[1])]))
+        files.append(name_file)
+
+        write_matrices(dir_file + name_file, ret)
+
+        ret = model.model.layers[i].mlp.up_proj.weight
+
+        name_file = "mlp-up_proj-" + str(i)
+        shapes.append("x".join([str(ret.shape[0]), str(ret.shape[1])]))
+        files.append(name_file)
+
+        write_matrices(dir_file + name_file, ret)
+
+        ret = model.model.layers[i].self_attn.k_proj.weight
+
+        name_file = "self_attn-k_proj-" + str(i)
+        shapes.append("x".join([str(ret.shape[0]), str(ret.shape[1])]))
+        files.append(name_file)
+
+        write_matrices(dir_file + name_file, ret)
+
+        ret = model.model.layers[i].self_attn.o_proj.weight
+
+        name_file = "self_attn-o_proj-" + str(i)
+        shapes.append("x".join([str(ret.shape[0]), str(ret.shape[1])]))
+        files.append(name_file)
+
+        write_matrices(dir_file + name_file, ret)
+
+        ret = model.model.layers[i].self_attn.q_proj.weight
+
+        name_file = "self_attn-q_proj-" + str(i)
+        shapes.append("x".join([str(ret.shape[0]), str(ret.shape[1])]))
+        files.append(name_file)
+
+        write_matrices(dir_file + name_file, ret)
+
+        ret = model.model.layers[i].self_attn.v_proj.weight
+
+        name_file = "self_attn-v_proj-" + str(i)
+        shapes.append("x".join([str(ret.shape[0]), str(ret.shape[1])]))
+        files.append(name_file)
+
+        write_matrices(dir_file + name_file, ret)
+    print("command: ", "--files " + ":".join(files), "--sizes " + ":".join(shapes))
+
+
 # get the quantized matrix that is used to predict and save it in a binary file
 # this is for mixtral model
-def mixtral_matrices(model, name, quant):
+def mixtral_GPTQ_matrices(model, name, quant):
     files = []
     shapes = []
     dir_file = save_dir + name + "/" + quant + "/"
@@ -732,8 +795,6 @@ def llama_matrices_stacked(model, name, quant):
     
     print("command: ", "--files " + ":".join(files), "--sizes " + ":".join(shapes))
 
-# get the quantized matrix that is used to predict and save it in a binary file
-# this is for mixtral model
 def mixtral_matrices_stacked(model, name, quant):
     files = []
     shapes = []
@@ -846,7 +907,6 @@ def mixtral_matrices_stacked(model, name, quant):
         write_matrices(dir_file + name_file, ret)
     print("command: ", "--files " + ":".join(files), "--sizes " + ":".join(shapes))
 
-
 # this is for llama 2 model
 def llama_divided_matrices(model, name, quant):
     dir_file = save_dir  + name + "/" + quant + "/original/"
@@ -949,14 +1009,14 @@ model = AutoModelForCausalLM.from_pretrained(path + "/" + name + "/" + quant,
                                              trust_remote_code=False,
                                              revision="main")
 
-llama_matrices_stacked(model, name, quant)
+llama_fp16_matrices(model, name, quant)
 
 name = "Llama-2-13B-chat-GPTQ"
 quant = "8b-64gs"
 model = AutoModelForCausalLM.from_pretrained(path + "/" + name + "/" + quant,
                                              trust_remote_code=False,
                                              revision="main")
-llama_matrices_stacked(model, name, quant)
+llama_fp16_matrices(model, name, quant)
 
 
 name = "Llama-2-13B-chat-GPTQ"
@@ -964,11 +1024,11 @@ quant = "4b-128gs"
 model = AutoModelForCausalLM.from_pretrained(path + "/" + name + "/" + quant,
                                              trust_remote_code=False,
                                              revision="main")
-llama_matrices_stacked(model, name, quant)
+llama_fp16_matrices(model, name, quant)
 
 name = "Llama-2-13B-chat-GPTQ"
 quant = "8b-128gs"
 model = AutoModelForCausalLM.from_pretrained(path + "/" + name + "/" + quant,
                                              trust_remote_code=False,
                                              revision="main")
-llama_matrices_stacked(model, name, quant)
+llama_fp16_matrices(model, name, quant)
