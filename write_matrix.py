@@ -1,5 +1,10 @@
 import numpy as np
 from transform_matrix import final_matrix
+# where you will save the matrices
+save_dir = "/data/matrix/matrices/"
+# where you will get the models
+path = "/data/matrix/models"
+
 
 # write the matrix in the file `name`
 def write_matrices(name, matrices):
@@ -140,7 +145,7 @@ def llama_fp16_matrices(model, name, quant):
         shapes.append("x".join([str(ret.shape[0]), str(ret.shape[1])]))
         files.append(name_file)
         
-        write_matrices(dir_file + name_file, ret)
+        #write_matrices(dir_file + name_file, ret)
 
         ret = model.model.layers[i].mlp.gate_proj.weight.detach().numpy()
 
@@ -148,7 +153,7 @@ def llama_fp16_matrices(model, name, quant):
         shapes.append("x".join([str(ret.shape[0]), str(ret.shape[1])]))
         files.append(name_file)
 
-        write_matrices(dir_file + name_file, ret)
+        #write_matrices(dir_file + name_file, ret)
 
         ret = model.model.layers[i].mlp.up_proj.weight.detach().numpy()
 
@@ -156,7 +161,7 @@ def llama_fp16_matrices(model, name, quant):
         shapes.append("x".join([str(ret.shape[0]), str(ret.shape[1])]))
         files.append(name_file)
 
-        write_matrices(dir_file + name_file, ret)
+        #write_matrices(dir_file + name_file, ret)
 
         ret = model.model.layers[i].self_attn.k_proj.weight.detach().numpy()
 
@@ -164,7 +169,7 @@ def llama_fp16_matrices(model, name, quant):
         shapes.append("x".join([str(ret.shape[0]), str(ret.shape[1])]))
         files.append(name_file)
 
-        write_matrices(dir_file + name_file, ret)
+        #write_matrices(dir_file + name_file, ret)
 
         ret = model.model.layers[i].self_attn.o_proj.weight.detach().numpy()
 
@@ -172,7 +177,7 @@ def llama_fp16_matrices(model, name, quant):
         shapes.append("x".join([str(ret.shape[0]), str(ret.shape[1])]))
         files.append(name_file)
 
-        write_matrices(dir_file + name_file, ret)
+        #write_matrices(dir_file + name_file, ret)
 
         ret = model.model.layers[i].self_attn.q_proj.weight.detach().numpy()
 
@@ -180,7 +185,7 @@ def llama_fp16_matrices(model, name, quant):
         shapes.append("x".join([str(ret.shape[0]), str(ret.shape[1])]))
         files.append(name_file)
 
-        write_matrices(dir_file + name_file, ret)
+        #write_matrices(dir_file + name_file, ret)
 
         ret = model.model.layers[i].self_attn.v_proj.weight.detach().numpy()
 
@@ -188,7 +193,7 @@ def llama_fp16_matrices(model, name, quant):
         shapes.append("x".join([str(ret.shape[0]), str(ret.shape[1])]))
         files.append(name_file)
 
-        write_matrices(dir_file + name_file, ret)
+        #write_matrices(dir_file + name_file, ret)
     print("command: ", "--files " + ":".join(files), "--sizes " + ":".join(shapes))
 
 
@@ -300,6 +305,76 @@ def mixtral_GPTQ_matrices(model, name, quant):
         ret = final_matrix(qzeros, scales, qweight, bits, group_size, wf).numpy()
 
         name_file = "self_attn-v_proj-" + str(i)
+        shapes.append("x".join([str(ret.shape[0]), str(ret.shape[1])]))
+        files.append(name_file)
+
+        write_matrices(dir_file + name_file, ret)
+    print("command: ", "--files " + ":".join(files), "--sizes " + ":".join(shapes))
+
+def mixtral_fp16_matrices(model, name, quant):
+    files = []
+    shapes = []
+    dir_file = save_dir + name + "/" + quant + "/"
+    for i in range(len(model.model.layers)):
+        for j in range(len(model.model.layers[i].block_sparse_moe.experts)):
+            name_file = "block_sparse-w1-" + str(j) + "-" + str(i)
+            
+            ret = model.model.layers[i].block_sparse_moe.experts[j].w1.weight.detach().numpy()
+
+            files.append(name_file)
+            shapes.append("x".join([str(ret.shape[0]), str(ret.shape[1])]))
+
+            write_matrices(dir_file + name_file, ret)
+
+            name_file = "block_sparse-w2-" + str(j) + "-" + str(i)
+
+            ret = model.model.layers[i].block_sparse_moe.experts[j].w2.weight.detach().numpy()
+
+            files.append(name_file)
+            shapes.append("x".join([str(ret.shape[0]), str(ret.shape[1])]))
+
+            write_matrices(dir_file + name_file, ret)
+
+            name_file = "block_sparse-w3-" + str(j) + "-" + str(i)
+
+            ret = model.model.layers[i].block_sparse_moe.experts[j].w3.weight.detach().numpy()
+
+            shapes.append("x".join([str(ret.shape[0]), str(ret.shape[1])]))
+            files.append(name_file)
+
+            write_matrices(dir_file + name_file, ret)
+
+        name_file = "self_attn-k_proj-" + str(i)
+
+        ret = model.model.layers[i].self_attn.k_proj.weight.detach().numpy()
+
+        shapes.append("x".join([str(ret.shape[0]), str(ret.shape[1])]))
+        files.append(name_file)
+
+        write_matrices(dir_file + name_file, ret)
+
+        name_file = "self_attn-o_proj-" + str(i)
+
+        ret = model.model.layers[i].self_attn.o_proj.weight.detach().numpy()
+
+        shapes.append("x".join([str(ret.shape[0]), str(ret.shape[1])]))
+        files.append(name_file)
+
+        write_matrices(dir_file + name_file, ret)
+
+        name_file = "self_attn-q_proj-" + str(i)
+
+        ret = model.model.layers[i].self_attn.q_proj.weight.detach().numpy()
+
+        shapes.append("x".join([str(ret.shape[0]), str(ret.shape[1])]))
+        files.append(name_file)
+
+        write_matrices(dir_file + name_file, ret)
+
+        name_file = "self_attn-v_proj-" + str(i)
+
+        ret = model.model.layers[i].self_attn.v_proj.weight.detach().numpy()
+
         shapes.append("x".join([str(ret.shape[0]), str(ret.shape[1])]))
         files.append(name_file)
 

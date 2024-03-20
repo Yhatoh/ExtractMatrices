@@ -6,7 +6,7 @@ import torch
 
 from bytes import get_bytes, get_bytes_vector, get_bytes_matrix
 from transform_matrix import final_matrix
-from write_matrix import write_matrices
+from write_matrix import write_matrices, llama_matrices_stacked, llama_fp16_matrices, mixtral_fp16_matrices
 
 # where you will save the matrices
 save_dir = "/data/matrix/matrices/"
@@ -125,11 +125,12 @@ def mixtral_matrices_stacked(model, name, quant):
         write_matrices(dir_file + name_file, ret)
     print("command: ", "--files " + ":".join(files), "--sizes " + ":".join(shapes))
 
-#quant = "8b-nonegs"
-#name = "Mixtral-8x7B-Instruct-v0.1-GPTQ"
-#model = AutoModelForCausalLM.from_pretrained(path + "/" + name + "/" + quant,
-#                                             trust_remote_code=False,
-#                                             revision="main")
+quant = "fp16"
+name = "Mixtral-8x7B-Instruct-v0.1-GPTQ"
+model = AutoModelForCausalLM.from_pretrained(path + "/" + name + "/" + quant,
+                                             trust_remote_code=False,
+                                             revision="main")
+mixtral_fp16_matrices(model, name, quant)
 #print("8b-nonegs", mixtral_GPTQ_uniques(model))
 #
 #quant = "4b-nonegs"
@@ -166,19 +167,20 @@ def mixtral_matrices_stacked(model, name, quant):
 #llama_divided_matrices(model, name, quant)
 
 #name = "Llama-2-13B-chat-GPTQ"
-#quant = "8b-64gs"
+#quant = "4b-128gs"
 #model = AutoModelForCausalLM.from_pretrained(path + "/" + name + "/" + quant,
 #                                             trust_remote_code=False,
 #                                             revision="main")
 #
-#llama_GPTQ_matrices(model, name, quant)
+#llama_matrices_stacked(model, name, quant, 4)
 #
 #name = "Llama-2-13B-chat-GPTQ"
 #quant = "8b-128gs"
 #model = AutoModelForCausalLM.from_pretrained(path + "/" + name + "/" + quant,
 #                                             trust_remote_code=False,
 #                                             revision="main")
-#
+#llama_matrices_stacked(model, name, quant, 4)
+
 #llama_GPTQ_matrices(model, name, quant)
 #
 #name = "Llama-2-7B-chat-GPTQ"
@@ -189,10 +191,10 @@ def mixtral_matrices_stacked(model, name, quant):
 #llama_fp16_matrices(model, name, quant)
 #
 
-#name = "Gemma2b"
-#quant = "gemma-2b"
-#model = AutoModelForCausalLM.from_pretrained(path + "/" + name + "/" + quant)
-#llama_fp16_matrices(model, name, quant)
+name = "Gemma2b"
+quant = "gemma-2b"
+model = AutoModelForCausalLM.from_pretrained(path + "/" + name + "/" + quant)
+llama_fp16_matrices(model, name, quant)
 
 #name = "Gemma7b"
 #quant = "gemma-7b"
